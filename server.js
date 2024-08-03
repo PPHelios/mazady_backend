@@ -10,7 +10,7 @@ const server = express();
 // Allow request from any source. In real production, this should be limited to allowed origins only
 const allowedOrigins =
   WHITE_LISTED_END_POINTS.split(", "); /** other domains if any */
-
+console.log(allowedOrigins);
 server.use(
   cors({
     origin: function (origin, callback) {
@@ -24,7 +24,8 @@ server.use(
       }
       return callback(null, true);
     },
-    credentials: true
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Specify allowed HTTP methods
+    credentials: true // Allow cookies to be sent
   })
 );
 server.disable("x-powered-by"); //Reduce fingerprinting
