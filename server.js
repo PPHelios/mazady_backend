@@ -9,8 +9,8 @@ import { connectToMongo } from "./utils/connectToMongo.util.js";
 const server = express();
 // Allow request from any source. In real production, this should be limited to allowed origins only
 const allowedOrigins =
-  WHITE_LISTED_END_POINTS.split(", "); /** other domains if any */
-console.log(allowedOrigins);
+  WHITE_LISTED_END_POINTS.split(","); /** other domains if any */
+// console.log(allowedOrigins);
 server.use(
   cors({
     origin: function (origin, callback) {
