@@ -5,7 +5,9 @@ mongoose.set("strictQuery", false);
 
 export const connectToMongo = async () => {
   try {
-    await mongoose.connect(URI, {});
+    // const conn =await mongoose.createConnection(URI, {}).asPromise();
+    
+    mongoose.connect(URI, {});
     console.log("connected to db");
   } catch (error) {
     console.log(err);

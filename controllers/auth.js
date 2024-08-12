@@ -18,11 +18,11 @@ export async function Register(req, res) {
   // using es6 object destructing
   const { first_name, last_name, email, password, rePassword } = req.body;
   if (password !== rePassword) {
-    return res.status(400).json({
-      status: "failed",
+    res.status(400).json({
       data: [],
       message: "Passwords do not match"
     });
+    return;
   }
   try {
     // create an instance of a user
@@ -34,12 +34,14 @@ export async function Register(req, res) {
     });
     // Check if user already exists
     let existingUser = await User.findOne({ email });
-    if (existingUser)
-      return res.status(400).json({
-        status: "failed",
+    if (existingUser) {
+      res.status(400).json({
         data: [],
         message: "It seems you already have an account, please log in instead."
       });
+      return;
+    }
+
     const savedUser = await newUser.save(); // save new user into the database
     savedUser = savedUser.toObject(); // Convert Mongoose document to plain JavaScript object
     delete savedUser.password; // Remove the password field
@@ -49,7 +51,6 @@ export async function Register(req, res) {
     const refreshToken = createRefreshToken({ userId: savedUser._id }); // generate session token for user
     res.cookie("RefreshToken", refreshToken, cookieOptions); // set the token to http-only cookie
     res.status(200).json({
-      status: "success",
       data: savedUser,
       message:
         "Thank you for registering with us. Your account has been successfully created."
@@ -57,13 +58,10 @@ export async function Register(req, res) {
   } catch (err) {
     console.log(err);
     res.status(500).json({
-      status: "error",
-      code: 500,
       data: [],
       message: "Internal server error"
     });
   }
-  res.end();
 }
 
 /**
@@ -77,12 +75,14 @@ export async function Login(req, res) {
   try {
     // Check if user exists
     let user = await User.findOne({ email }).select("+password");
-    if (!user)
-      return res.status(401).json({
-        status: "failed",
+    if (!user) {
+      res.status(401).json({
         data: [],
         message: "Account does not exist"
       });
+      return;
+    }
+
     // if user exists
     // validate password
     const isPasswordValid = bcrypt.compare(
@@ -90,13 +90,14 @@ export async function Login(req, res) {
       user.password
     );
     // if not valid, return unathorized response
-    if (!isPasswordValid)
-      return res.status(401).json({
-        status: "failed",
+    if (!isPasswordValid) {
+      res.status(401).json({
         data: [],
         message:
           "Invalid email or password. Please try again with the correct credentials."
       });
+      return;
+    }
 
     const accessToken = createAccessToken({ userId: user._id }); // generate session token for user
     res.cookie("AccessToken", accessToken, cookieOptions); // set the token to http-only cookie
@@ -107,30 +108,30 @@ export async function Login(req, res) {
     user.role = roles[user.role]; // Change user code to readable string
     res.status(200).json({
       data: user,
-      status: "success",
       message: "You have successfully logged in."
     });
   } catch (err) {
     console.log(err);
     res.status(500).json({
       status: "error",
-      code: 500,
       data: [],
       message: "Internal Server Error"
     });
   }
-  res.end();
 }
 
 /**
  * @route POST /auth/logout
  * @desc Logout user
- * @access private
+ * @access Public
  */
 export async function Logout(req, res) {
   try {
     const refreshToken = req.cookies["RefreshToken"];
-    if (!refreshToken) return res.sendStatus(204); // No content
+    if (!refreshToken) {
+      res.sendStatus(204); // No content
+      return;
+    }
     // Clear tokens from cookies
     res.cookie("AccessToken", "", { maxAge: 0, httpOnly: true });
     res.cookie("RefreshToken", "", { maxAge: 0, httpOnly: true });
@@ -146,5 +147,4 @@ export async function Logout(req, res) {
       message: "Internal Server Error"
     });
   }
-  res.end();
 }

@@ -5,7 +5,16 @@ import {
   SECRET_REFRESH_TOKEN
 } from "../config/env.config.js";
 
-export const verifyToken = (token) => jwt.verify(token, SECRET_ACCESS_TOKEN);
+export const verifyToken = async(token,secret) => jwt.verify(token, secret,async(err,decoded)=>{
+  if(err){
+    console.log(err.message)
+    return res
+    .status(401)
+    .json({ message: "This session has expired. Please login" });
+  }
+  // console.log(decoded)
+  return decoded
+});
 
 export const createAccessToken = (payload) =>
   jwt.sign(payload, SECRET_ACCESS_TOKEN, { expiresIn: jwtAccessTTL });

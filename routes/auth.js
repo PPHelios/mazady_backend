@@ -2,9 +2,13 @@ import express from "express";
 import { Register, Login, Logout } from "../controllers/auth.js";
 import { check } from "express-validator";
 import { validateData } from "../middleware/validate.js";
-import { loginSchema, signupSchema } from "../middleware/zod.schemas.js";
+import { loginSchema, signupSchema } from "../config/zod.schemas.js";
+import { rateLimiterMiddleware } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
+
+// Rate limit access to these API's
+router.use(rateLimiterMiddleware);
 
 // Register route -- POST request
 router.post(
@@ -12,7 +16,6 @@ router.post(
   check("email").normalizeEmail(),
   check("first_name").escape(),
   check("last_name").escape(),
-  check("password"),
   validateData(signupSchema),
   Register
 );
@@ -27,7 +30,7 @@ router.post(
   validateData(loginSchema),
   Login
 );
-// Logout route ==
+// Logout route == GET request
 router.get("/logout", Logout);
 
 export default router;

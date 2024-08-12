@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
+const Schema = mongoose.Schema;
 const UserSchema = new mongoose.Schema(
   {
     first_name: {
@@ -30,7 +31,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
       default: "0x01"
-    }
+    },
+    ads: [{
+      type: Schema.Types.ObjectId,
+      ref: "Item",
+    }]
   },
   { timestamps: true }
 );

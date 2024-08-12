@@ -1,10 +1,4 @@
-import { RateLimiterMemory } from "rate-limiter-flexible";
-
-const opts = {
-  points: 10, // Number of points
-  duration: 60 // Per second(s)
-};
-const rateLimiter = new RateLimiterMemory(opts);
+import { rateLimiter } from "../utils/rateLimiter.util.js";
 
 export const rateLimiterMiddleware = (req, res, next) => {
   rateLimiter

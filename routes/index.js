@@ -1,14 +1,12 @@
-import refreshAccessToken from "../middleware/refreshAccessToken.js";
-import { Verify, VerifyRole } from "../middleware/verify.js";
-import { rateLimiterMiddleware } from "../utils/rateLimiterMongo.js";
-import Auth from "./auth.js";
-
+import AuthRouter from "./auth.js";
+import AdminRouter from "./admin.js";
+import UserRouter from "./user.js";
+import SearchRouter from "./search.js";
 const Route = (server) => {
-  // server.get("/favico.ico", (req, res) => {
-  // 	res.sendStatus(404);
-  // });
+  server.get("/favico.ico", (req, res) => {
+    res.sendStatus(404);
+  });
 
-  server.disable("x-powered-by");
   server.use((req, res, next) => {
     console.log(
       req.method,
@@ -34,24 +32,9 @@ const Route = (server) => {
       });
     }
   });
-  server.use("/auth", Auth);
-  server.get(
-    "/user",
-    rateLimiterMiddleware,
-    refreshAccessToken,
-    Verify,
-    (req, res) => {
-      res.status(200).json({
-        status: "success",
-        message: "Welcome to your Dashboard!"
-      });
-    }
-  );
-  server.get("/admin", refreshAccessToken, Verify, VerifyRole, (req, res) => {
-    res.status(200).json({
-      status: "success",
-      message: "Welcome to the Admin portal!"
-    });
-  });
+  server.use("/dashboard", AdminRouter);
+  server.use("/auth", AuthRouter);
+  server.use("/search", SearchRouter);
+  server.use("/", UserRouter);
 };
 export default Route;
